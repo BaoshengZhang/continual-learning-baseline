@@ -6,9 +6,28 @@ I'm working on it... XD
 ## Requirements
 pytorch
 ## Methods
-LwF,EWC,OWM,...
+SGD  
+Joint  
+Lwf  
+GEM  
+EWC  
+EWC_online  
+...
 ## Datasets
-MNIST,CIFAR-10,CIFAR-100,...
+MNIST  
+CIFAR-10  
+CIFAR-100  
+miniImgaeNet
+## Networks
+Conv  
+fc  
+## Options
+--experiment:  choose from splitMNIST, permMNIST, CIFAR10, CIFAR100  
+--scenario: task:  each task has own output-units, always only those units are considered  
+&nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp;&nbsp;
+class:  each task has own output-units, all units of tasks seen so far are considered  
+--tasks: change numbers of task  
+unfin..
 ## Citation
 @article{lve lve lve,  
 &nbsp; &nbsp; &nbsp; title={Yuchen puts refs above and Baosheng puts Below},  
