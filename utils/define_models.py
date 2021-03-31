@@ -1,5 +1,5 @@
 import utils
-from utils import checkattr
+from utils.utils import checkattr
 
 ##-------------------------------------------------------------------------------------------------------------------##
 

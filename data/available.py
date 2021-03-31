@@ -1,6 +1,6 @@
 from torchvision import datasets, transforms
 from data.manipulate import UnNormalize
-'''data available mnist, mnist28, cifar10, cifar100, version zbs123'''
+'''data available mnist, cifar10, cifar100, version zbs123'''
 
 # Specify available data-sets
 AVAILABLE_DATASETS = {

@@ -6,7 +6,7 @@ from data.available import AVAILABLE_DATASETS, AVAILABLE_TRANSFORMS, DATASET_CON
 from data.manipulate import ReducedDataset, SubDataset, TransformedDataset, permutate_image_pixels
 '''process to the datasets version zbs123'''
 def get_dataset(name, type='train', download=True, capacity=None, permutation=None, dir='./store/datasets',
-                verbose=False, augment=False, normalize=False, target_transform=None, valid_prop=0.):
+                augment=False, normalize=False, target_transform=None, valid_prop=0.):
     '''Create [train|valid|test]-dataset.'''
 
     data_name = 'mnist' if name in ('mnist28') else name
@@ -39,8 +39,7 @@ def get_dataset(name, type='train', download=True, capacity=None, permutation=No
         dataset = ReducedDataset(dataset, indices_to_use)
 
     # print information about dataset on the screen
-    if verbose:
-        print(" --> {}: '{}'-dataset consisting of {} samples".format(name, type, len(dataset)))
+    print(" --> {}: '{}'-dataset consisting of {} samples".format(name, type, len(dataset)))
 
     # if dataset is (possibly) not large enough, create copies until it is.
     if capacity is not None and len(dataset) < capacity:
@@ -54,7 +53,7 @@ def get_dataset(name, type='train', download=True, capacity=None, permutation=No
 
 """only_config:只返回config, only_test:只测试"""
 def get_multitask_experiment(name, scenario, tasks, data_dir="./store/datasets", normalize=False, augment=False,
-                             only_config=False, verbose=False, exception=False, only_test=False):
+                             only_config=False, exception=False, only_test=False):
     '''Load, organize and return train- and test-dataset for requested multi-task experiment.'''
 
     ## NOTE: option 'normalize' and 'augment' only implemented for CIFAR-based experiments.
@@ -68,9 +67,9 @@ def get_multitask_experiment(name, scenario, tasks, data_dir="./store/datasets",
             # prepare dataset
             if not only_test:
                 train_dataset = get_dataset('mnist', type="train", permutation=None, dir=data_dir,
-                                            target_transform=None, verbose=verbose)
+                                            target_transform=None)
             test_dataset = get_dataset('mnist', type="test", permutation=None, dir=data_dir,
-                                       target_transform=None, verbose=verbose)
+                                       target_transform=None)
             # generate permutations
             if exception:
                 permutations = [None] + [np.random.permutation(config['size']**2) for _ in range(tasks-1)]
@@ -80,9 +79,7 @@ def get_multitask_experiment(name, scenario, tasks, data_dir="./store/datasets",
             train_datasets = []
             test_datasets = []
             for task_id, perm in enumerate(permutations):
-                target_transform = transforms.Lambda(
-                    lambda y, x=task_id: y + x*classes_per_task
-                ) if scenario in ('task', 'class', 'all') else None
+                target_transform = transforms.Lambda(lambda y, x=task_id: y + x*classes_per_task)
                 if not only_test:
                     train_datasets.append(TransformedDataset(
                         train_dataset, transform=transforms.Lambda(lambda x, p=perm: permutate_image_pixels(x, p)),
@@ -105,10 +102,8 @@ def get_multitask_experiment(name, scenario, tasks, data_dir="./store/datasets",
             target_transform = transforms.Lambda(lambda y, p=permutation: int(p[y]))
             # prepare train and test datasets with all classes
             if not only_test:
-                mnist_train = get_dataset('mnist28', type="train", dir=data_dir, target_transform=target_transform,
-                                          verbose=verbose)
-            mnist_test = get_dataset('mnist28', type="test", dir=data_dir, target_transform=target_transform,
-                                     verbose=verbose)
+                mnist_train = get_dataset('mnist28', type="train", dir=data_dir, target_transform=target_transform)
+            mnist_test = get_dataset('mnist28', type="test", dir=data_dir, target_transform=target_transform)
             # generate labels-per-task
             labels_per_task = [
                 list(np.array(range(classes_per_task)) + classes_per_task * task_id) for task_id in range(tasks)
@@ -117,9 +112,6 @@ def get_multitask_experiment(name, scenario, tasks, data_dir="./store/datasets",
             train_datasets = []
             test_datasets = []
             for labels in labels_per_task:
-                target_transform = transforms.Lambda(
-                    lambda y, x=labels[0]: y - x
-                ) if scenario=='domain' else None
                 if not only_test:
                     train_datasets.append(SubDataset(mnist_train, labels, target_transform=target_transform))
                 test_datasets.append(SubDataset(mnist_test, labels, target_transform=target_transform))
@@ -137,9 +129,9 @@ def get_multitask_experiment(name, scenario, tasks, data_dir="./store/datasets",
             # prepare train and test datasets with all classes
             if not only_test:
                 cifar10_train = get_dataset('cifar10', type="train", dir=data_dir, normalize=normalize,
-                                             augment=augment, target_transform=target_transform, verbose=verbose)
+                                             augment=augment, target_transform=target_transform)
             cifar10_test = get_dataset('cifar10', type="test", dir=data_dir, normalize=normalize,
-                                        target_transform=target_transform, verbose=verbose)
+                                        target_transform=target_transform)
             # generate labels-per-task
             labels_per_task = [
                 list(np.array(range(classes_per_task)) + classes_per_task * task_id) for task_id in range(tasks)
@@ -148,7 +140,6 @@ def get_multitask_experiment(name, scenario, tasks, data_dir="./store/datasets",
             train_datasets = []
             test_datasets = []
             for labels in labels_per_task:
-                target_transform = transforms.Lambda(lambda y, x=labels[0]: y - x) if scenario == 'domain' else None
                 if not only_test:
                     train_datasets.append(SubDataset(cifar10_train, labels, target_transform=target_transform))
                 test_datasets.append(SubDataset(cifar10_test, labels, target_transform=target_transform))
@@ -166,9 +157,9 @@ def get_multitask_experiment(name, scenario, tasks, data_dir="./store/datasets",
             # prepare train and test datasets with all classes
             if not only_test:
                 cifar100_train = get_dataset('cifar100', type="train", dir=data_dir, normalize=normalize,
-                                             augment=augment, target_transform=target_transform, verbose=verbose)
+                                             augment=augment, target_transform=target_transform)
             cifar100_test = get_dataset('cifar100', type="test", dir=data_dir, normalize=normalize,
-                                        target_transform=target_transform, verbose=verbose)
+                                        target_transform=target_transform)
             # generate labels-per-task
             labels_per_task = [
                 list(np.array(range(classes_per_task)) + classes_per_task * task_id) for task_id in range(tasks)
@@ -177,7 +168,6 @@ def get_multitask_experiment(name, scenario, tasks, data_dir="./store/datasets",
             train_datasets = []
             test_datasets = []
             for labels in labels_per_task:
-                target_transform = transforms.Lambda(lambda y, x=labels[0]: y-x) if scenario=='domain' else None
                 if not only_test:
                     train_datasets.append(SubDataset(cifar100_train, labels, target_transform=target_transform))
                 test_datasets.append(SubDataset(cifar100_test, labels, target_transform=target_transform))
@@ -185,7 +175,7 @@ def get_multitask_experiment(name, scenario, tasks, data_dir="./store/datasets",
         raise RuntimeError('Given undefined experiment: {}'.format(name))
 
     # If needed, update number of (total) classes in the config-dictionary
-    config['classes'] = classes_per_task if scenario == 'domain' else classes_per_task * tasks
+    config['classes'] = classes_per_task * tasks
     config['normalize'] = normalize if (name=='CIFAR10' or name=='CIFAR100') else False
     if config['normalize']:
         if name =='CIFAR10':
